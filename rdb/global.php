@@ -82,6 +82,15 @@ use r\ValuedQuery\RObject;
 
 // ------------- Global functions in namespace r -------------
 
+
+/**
+ * @param null $optsOrHost
+ * @param null $port
+ * @param null $db
+ * @param null $apiKey
+ * @param null $timeout
+ * @return Connection
+ */
 function connect($optsOrHost = null, $port = null, $db = null, $apiKey = null, $timeout = null)
 {
     return new Connection($optsOrHost, $port, $db, $apiKey, $timeout);

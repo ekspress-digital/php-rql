@@ -22,16 +22,28 @@ class Connection extends DatumConverter
     private $password;
     private $activeTokens;
     private $timeout;
+    private $connectTimeout;
     private $ssl;
 
     public $defaultDbName;
 
+	/**
+	 * @param array|string $optsOrHost
+	 * @param int $port
+	 * @param string $db
+	 * @param string $apiKey
+	 * @param int $timeout
+	 * @param int $connectTimeout
+	 * @throws RqlDriverError
+	 * @throws \Exception
+	 */
     public function __construct(
         $optsOrHost = null,
         $port = null,
         $db = null,
         $apiKey = null,
-        $timeout = null
+        $timeout = null,
+        $connectTimeout = null
     ) {
         if (is_array($optsOrHost)) {
             $opts = $optsOrHost;
@@ -66,6 +78,9 @@ class Connection extends DatumConverter
             }
             if (isset($opts['timeout'])) {
                 $timeout = $opts['timeout'];
+            }
+            if (isset($opts['connectTimeout'])) {
+	            $connectTimeout = $opts['connectTimeout'];
             }
             if (isset($opts['ssl'])) {
                 $ssl = $opts['ssl'];
@@ -106,6 +121,7 @@ class Connection extends DatumConverter
         $this->user = $user;
         $this->password = $password;
         $this->timeout = null;
+        $this->connectTimeout = $connectTimeout ?: ini_get("default_socket_timeout");
         $this->ssl = $ssl;
 
         if (isset($db)) {
@@ -430,6 +446,10 @@ class Connection extends DatumConverter
         }
     }
 
+	/**
+	 * @throws RqlDriverError
+	 * @throws \Exception
+	 */
     private function connect()
     {
         if ($this->isOpen()) {
@@ -446,12 +466,14 @@ class Connection extends DatumConverter
                 "ssl://" . $this->host . ":" . $this->port,
                 $errno,
                 $errstr,
-                ini_get("default_socket_timeout"),
+                $this->connectTimeout,
                 STREAM_CLIENT_CONNECT,
                 $context
             );
         } else {
-            $this->socket = stream_socket_client("tcp://" . $this->host . ":" . $this->port, $errno, $errstr);
+            $this->socket = stream_socket_client("tcp://" . $this->host . ":" . $this->port, $errno, $errstr,
+	            $this->connectTimeout
+            );
         }
         if ($errno != 0 || $this->socket === false) {
             $this->socket = null;
