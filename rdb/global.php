@@ -82,9 +82,20 @@ use r\ValuedQuery\RObject;
 
 // ------------- Global functions in namespace r -------------
 
-function connect($optsOrHost = null, $port = null, $db = null, $apiKey = null, $timeout = null)
+/**
+ * @param array|string $optsOrHost
+ * @param int $port
+ * @param string $db
+ * @param string $apiKey
+ * @param int $timeout
+ * @param int $connectTimeout
+ * @return Connection
+ * @throws RqlDriverError
+ * @throws \Exception
+ */
+function connect($optsOrHost = null, $port = null, $db = null, $apiKey = null, $timeout = null, $connectTimeout = null)
 {
-    return new Connection($optsOrHost, $port, $db, $apiKey, $timeout);
+    return new Connection($optsOrHost, $port, $db, $apiKey, $timeout, $connectTimeout);
 }
 
 function db($dbName)
